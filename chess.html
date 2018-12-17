@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>国际象棋</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="lib/chessboard/css/chessboard-0.3.0.css">
+</head>
+<body>
+<p><div id="restart" class="restart" style="width: 100px; margin: auto"><h2>国际象棋</h2></div></p>
+<div class="info" style="width: 400px; margin: auto">
+    模式：
+    <td><input name="mode" type="radio" value="先手" checked/> 玩家先手 </td>
+    <td><input name="mode" type="radio" value="后手" /> 玩家后手 </td>
+    <td><input name="mode" type="radio" value="双人" /> 双人对战 </td>
+    <br>
+    <br>
+    难度：
+    <select id="search-depth">
+        <option value="2">简单</option>
+        <option value="3" selected>普通</option>
+        <option value="4">困难</option>
+    </select>
+    <br>
+    <br>
+    <div style="padding-top:2px"><input type="button" class="button" value="开始/重开" onclick="restart()">&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="button" class="button" value="悔棋" onclick="retract()">&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="button" class="button" value="转换视角" onclick="orientation()"></div>
+    <br>
+    <div id="board" class="board"></div>
+    <br>
+    记录：
+    <div id="move-history" class="move-history" style="height: 100px; overflow-y: scroll;"></div>
+</div>
+<script src="lib/jquery/jquery-3.2.1.min.js"></script>
+<script src="lib/chess/chess.js"></script>
+<script src="lib/chessboard/js/chessboard-0.3.0.js"></script>
+<script src="search.js"></script>
+<script type="text/javascript"><!--
+    "use strict";
+    // 开始/重新开始
+    function restart() {
+        var check = $('input[name="mode"]:checked').val();
+        if (check === '后手'){
+            cfg.orientation = 'black';
+            window.setTimeout(makeBestMove, 250);
+        }else {
+            cfg.orientation = 'white';
+        }
+        board = ChessBoard('board', cfg);
+        game.reset();
+        board.position(game.fen());
+        var historyElement = $('#move-history').empty();
+        historyElement.empty();
+    };
+    //悔棋
+    function retract() {
+        var check = $('input[name="mode"]:checked').val();
+        if (check === '双人') {
+            game.undo();
+            board.position(game.fen());
+            renderMoveHistory(game.history());
+        }else if(check === '先手') {
+            game.undo();
+            game.undo();
+            board.position(game.fen());
+            renderMoveHistory(game.history());
+        }else if(check === '后手' && game.history().length > 2) {
+            game.undo();
+            game.undo();
+            board.position(game.fen());
+            renderMoveHistory(game.history());
+        }
+    };
+    //转换视角
+    function orientation() {
+        var check = $('input[name="mode"]:checked').val();
+        if (check === '双人'){
+            if(cfg.orientation === 'white') {
+                cfg.orientation = 'black';
+            }else if(cfg.orientation === 'black') {
+                cfg.orientation = 'white';
+            }
+            board = ChessBoard('board', cfg);
+            board.position(game.fen());
+        }
+    };
+    --></script>
+
+</body>
+</html>
